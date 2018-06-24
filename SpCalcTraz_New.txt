@@ -1,0 +1,113 @@
+/*    ==Scripting Parameters==
+
+    Source Server Version : SQL Server 2016 (13.0.4206)
+    Source Database Engine Edition : Microsoft SQL Server Enterprise Edition
+    Source Database Engine Type : Standalone SQL Server
+
+    Target Server Version : SQL Server 2016
+    Target Database Engine Edition : Microsoft SQL Server Enterprise Edition
+    Target Database Engine Type : Standalone SQL Server
+*/
+
+USE [TsetTaraz_970320]
+GO
+
+/****** Object:  StoredProcedure [dbo].[SpCalcTraz]    Script Date: 6/13/2018 12:30:46 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[SpCalcTraz]
+(
+@Id BIGINT=NULL,
+@Dars TINYINT=NULL
+)
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	
+DECLARE @statement nvarchar(max)
+
+SET @statement='
+
+DECLARE @sqrtIndex  REAL
+DECLARE @zaribEtminan REAL=1
+SET @sqrtIndex=.5
+
+WHILE 10000<( SELECT TOP 1
+
+		ROUND((1000*((NmrhFard.F_Nmrh-NmrhAvreg.AVGNmrh)/NmrhAvreg.STDEVNmrh)+5000)* @zaribEtminan,0,1) AS F_Traz
+
+	FROM 
+		dbo.NmrhFard AS NmrhFard INNER JOIN
+		(SELECT 
+			F_ID,
+			F_Drs,
+			POWER(AVG(F_Nmrh*F_Nmrh)-AVG(F_Nmrh)*AVG(F_Nmrh),@sqrtIndex) AS STDEVNmrh, AVG(F_Nmrh) AS AVGNmrh
+
+		FROM 
+			dbo.NmrhFard
+			
+		GROUP BY 
+			F_ID,
+			F_Drs
+		
+		) AS NmrhAvreg ON NmrhAvreg.F_Drs = NmrhFard.F_Drs AND NmrhAvreg.F_ID = NmrhFard.F_ID 
+		where (1=1) '
+		IF @Dars IS NOT NULL
+		BEGIN
+		SET @statement+=' and NmrhFard.f_drs= '+CAST(@Dars AS NVARCHAR(10))
+		END
+		IF @Id IS NOT NULL
+		BEGIN
+		SET @statement+=' and NmrhFard.f_id= ' +CAST(@Id AS NVARCHAR(10))
+		END
+        SET @statement+= ' ORDER BY F_Traz DESC'
+		SET @statement+=')
+		BEGIN 		
+		SET @sqrtIndex=@sqrtIndex+.01 
+		SET @zaribEtminan =.99 
+		 END '
+
+		SET @statement+='
+    SELECT 
+		NmrhFard.F_CdNmayndgi,
+		NmrhFard.F_ID,
+		NmrhFard.F_ShSndli,
+		NmrhFard.F_Drs,
+		ROUND((1000*((NmrhFard.F_Nmrh-NmrhAvreg.AVGNmrh)/NmrhAvreg.STDEVNmrh)+5000)*@zaribEtminan ,0,1) AS F_Traz
+
+	FROM 
+		dbo.NmrhFard AS NmrhFard INNER JOIN
+		( SELECT 
+			F_ID,
+			F_Drs,
+			POWER(AVG(F_Nmrh*F_Nmrh)-AVG(F_Nmrh)*AVG(F_Nmrh),@sqrtIndex) AS STDEVNmrh, AVG(F_Nmrh) AS AVGNmrh
+
+		FROM 
+			dbo.NmrhFard
+			
+		GROUP BY 
+			F_ID,
+			F_Drs
+		
+		) AS NmrhAvreg ON NmrhAvreg.F_Drs = NmrhFard.F_Drs AND NmrhAvreg.F_ID = NmrhFard.F_ID 
+		where (1=1) '	
+		IF @Dars IS NOT NULL
+		BEGIN
+		SET @statement=@statement+' and NmrhFard.f_drs= ' +CAST(@Dars AS NVARCHAR(10))
+		END
+		IF @Id IS NOT NULL
+		BEGIN
+		SET @statement=@statement+' and NmrhFard.f_id= '+CAST(@Id AS NVARCHAR(50))
+		END
+		--PRINT @statement
+		EXECUTE sp_executesql @statement
+END
+GO
+
+
