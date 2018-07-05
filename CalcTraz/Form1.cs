@@ -15,7 +15,7 @@ namespace CalcTraz
         private DataTable _dt;
         #endregion
 
-        #region Constructore
+        #region Constructor
         public Form1()
         {
             InitializeComponent();
@@ -44,7 +44,7 @@ namespace CalcTraz
 
             _count = dataGridViewX1.Rows.Count - 1;
 
-            List<double> list2 = new List<double>();
+            List<double> list = new List<double>();
             double sum = 0;
             for (int i = 0; i < _count; i++)
             {
@@ -60,7 +60,7 @@ namespace CalcTraz
             for (int i = 0; i < _count; i++)
             {
                 var z =( Convert.ToDouble(dataGridViewX1.Rows[i].Cells[0].Value.ToString()) - sum)/ stdev;
-                var resultTraz = Math.Floor( Convert.ToInt32(1000 * z+ 5000)* zaribEtminan);
+                var resultTraz = Math.Floor( Convert.ToInt32(1000 * z+ 5000)* zaribEtminan); // T=2000z+5000
 
                 if (resultTraz > 10000)
                 {
@@ -68,17 +68,17 @@ namespace CalcTraz
                     sqrtIndex = sqrtIndex + .01;
                     stdev = CalcStdev(sum, sqrtIndex);
                     i = -1;
-                    list2.Clear();
+                    list.Clear();
                 }
 
                 else
                 {
-                    list2.Add(resultTraz);
+                    list.Add(resultTraz);
                 }
             }
 
-            listBox2.DataSource = list2;
-            label2.Text = list2.Count.ToString();
+            listBox2.DataSource = list;
+            label2.Text = list.Count.ToString();
 
             //max min value ListBox2
             double max = Convert.ToDouble(listBox2.Items[0]);
@@ -98,13 +98,25 @@ namespace CalcTraz
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-             _dt = new DataTable();
-            _conn.ConnectionString = System.Configuration.ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
-            _conn.Open();
-            string query = "Select F_nmrh From NmrhFard WHERE f_drs=3 AND F_ID=139623322";
-            SqlDataAdapter da = new SqlDataAdapter(query, _conn);
-            da.Fill(_dt);
-            dataGridViewX1.DataSource = _dt;
+            try
+            {
+                _dt = new DataTable();
+                _conn.ConnectionString = System.Configuration.ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+                _conn.Open();
+                string query = "Select F_nmrh From NmrhFard WHERE f_drs=3 AND F_ID=139623322";
+                SqlDataAdapter da = new SqlDataAdapter(query, _conn);
+                da.Fill(_dt);
+                dataGridViewX1.DataSource = _dt;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                throw;
+            }
+            finally
+            {
+                _conn.Close();
+            }
         }
         #endregion
     }
