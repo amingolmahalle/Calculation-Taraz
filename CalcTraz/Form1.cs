@@ -62,7 +62,7 @@ namespace CalcTraz
                 var z = (Convert.ToDouble(dataGridViewX1.Rows[i].Cells[0].Value.ToString()) - sum) / stdev;
                 var resultTraz = Math.Floor(Convert.ToInt32(1000 * z + 5000) * zaribEtminan); // T=2000z+5000
 
-                if (resultTraz > 10000)
+                if (resultTraz > 10000)//سقف کنکور تا 15000 است
                 {
                     zaribEtminan = .99;
                     sqrtIndex = sqrtIndex + .01;
