@@ -24,7 +24,7 @@ namespace CalcTraz
 
         #region Functions
         public double CalcStdev(double avg, double val)
-        {            
+        {
             double s = 0;
             for (int i = 0; i < _count; i++)
             {
@@ -39,7 +39,7 @@ namespace CalcTraz
         #region Events
         private void button1_Click(object sender, EventArgs e)
         {
-            if(dataGridViewX1.Rows.Count==0)
+            if (dataGridViewX1.Rows.Count == 0)
                 return;
 
             _count = dataGridViewX1.Rows.Count - 1;
@@ -59,8 +59,8 @@ namespace CalcTraz
 
             for (int i = 0; i < _count; i++)
             {
-                var z =( Convert.ToDouble(dataGridViewX1.Rows[i].Cells[0].Value.ToString()) - sum)/ stdev;
-                var resultTraz = Math.Floor( Convert.ToInt32(1000 * z+ 5000)* zaribEtminan); // T=2000z+5000
+                var z = (Convert.ToDouble(dataGridViewX1.Rows[i].Cells[0].Value.ToString()) - sum) / stdev;
+                var resultTraz = Math.Floor(Convert.ToInt32(1000 * z + 5000) * zaribEtminan); // T=2000z+5000
 
                 if (resultTraz > 10000)
                 {
@@ -92,7 +92,7 @@ namespace CalcTraz
                 else if (cng < min)
                     min = cng;
             }
-           
+
             lblMax.Text = max.ToString(CultureInfo.InvariantCulture);
             lblMin.Text = min.ToString(CultureInfo.InvariantCulture);
         }
@@ -103,7 +103,7 @@ namespace CalcTraz
                 _dt = new DataTable();
                 _conn.ConnectionString = System.Configuration.ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
                 _conn.Open();
-                string query = "Select F_nmrh From NmrhFard WHERE f_drs=3 AND F_ID=139623322";
+                string query = "Select F_nmrh From NmrhFard WHERE f_drs=1 AND F_ID=139701311";
                 SqlDataAdapter da = new SqlDataAdapter(query, _conn);
                 da.Fill(_dt);
                 dataGridViewX1.DataSource = _dt;
