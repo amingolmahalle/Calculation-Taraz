@@ -44,7 +44,8 @@ namespace CalcTraz
 
             _count = dataGridViewX1.Rows.Count - 1;
 
-            List<double> list = new List<double>();
+            List<double> listLessThanTenThousand = new List<double>();
+            List<double> listMoreTenThousand = new List<double>();
             double sum = 0;
             for (int i = 0; i < _count; i++)
             {
@@ -60,41 +61,67 @@ namespace CalcTraz
             for (int i = 0; i < _count; i++)
             {
                 var z = (Convert.ToDouble(dataGridViewX1.Rows[i].Cells[0].Value.ToString()) - sum) / stdev;
-                var resultTraz = Math.Floor(Convert.ToInt32(1000 * z + 5000) * zaribEtminan); // T=2000z+5000
+                var resultTraz = Math.Floor(Convert.ToInt32(1000 * z + 5000) * zaribEtminan);
+
+                listLessThanTenThousand.Add(resultTraz);
+            }
+
+            for (int j = 0; j < _count; j++)
+            {
+                var z = (Convert.ToDouble(dataGridViewX1.Rows[j].Cells[0].Value.ToString()) - sum) / stdev;
+                var resultTraz = Math.Floor(Convert.ToInt32(1000 * z + 5000) * zaribEtminan); // OR --> T=2000z+5000
 
                 if (resultTraz > 10000)//سقف کنکور تا 15000 است
                 {
                     zaribEtminan = .99;
                     sqrtIndex = sqrtIndex + .01;
                     stdev = CalcStdev(sum, sqrtIndex);
-                    i = -1;
-                    list.Clear();
+                    j = -1;
+                    listMoreTenThousand.Clear();
                 }
 
                 else
-                {
-                    list.Add(resultTraz);
-                }
-            }
+                    listMoreTenThousand.Add(resultTraz);
 
-            listBox2.DataSource = list;
-            label2.Text = list.Count.ToString();
+            }
+         
+
+            listBox1.DataSource = listLessThanTenThousand;
+            countList1.Text = listLessThanTenThousand.Count.ToString();
+
+            listBox2.DataSource = listMoreTenThousand;
+            countList2.Text = listMoreTenThousand.Count.ToString();
 
             //max min value ListBox2
-            double max = Convert.ToDouble(listBox2.Items[0]);
-            double min = max;
+            double maxLst1 = Convert.ToDouble(listBox1.Items[0]);
+            double minLst1 = maxLst1;
+
+            foreach (var item in listBox1.Items)
+            {
+                var cng = Convert.ToDouble(item);
+                if (cng > maxLst1)
+                    maxLst1 = cng;
+                else if (cng < minLst1)
+                    minLst1 = cng;
+            }
+
+            //max min value ListBox2
+            double maxLst2 = Convert.ToDouble(listBox2.Items[0]);
+            double minLst2 = maxLst2;
 
             foreach (var item in listBox2.Items)
             {
                 var cng = Convert.ToDouble(item);
-                if (cng > max)
-                    max = cng;
-                else if (cng < min)
-                    min = cng;
+                if (cng > maxLst2)
+                    maxLst2 = cng;
+                else if (cng < minLst2)
+                    minLst2 = cng;
             }
+            maxList1.Text = maxLst1.ToString(CultureInfo.InvariantCulture);
+            minList1.Text = minLst1.ToString(CultureInfo.InvariantCulture);
 
-            lblMax.Text = max.ToString(CultureInfo.InvariantCulture);
-            lblMin.Text = min.ToString(CultureInfo.InvariantCulture);
+            maxList2.Text = maxLst2.ToString(CultureInfo.InvariantCulture);
+            minList2.Text = minLst2.ToString(CultureInfo.InvariantCulture);
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -103,7 +130,7 @@ namespace CalcTraz
                 _dt = new DataTable();
                 _conn.ConnectionString = System.Configuration.ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
                 _conn.Open();
-                string query = "Select F_nmrh From NmrhFard WHERE f_drs=1 AND F_ID=139701311";
+                string query = "Select F_nmrh From NmrhFard WHERE F_Drs = 6 AND F_ID = 139701331";
                 SqlDataAdapter da = new SqlDataAdapter(query, _conn);
                 da.Fill(_dt);
                 dataGridViewX1.DataSource = _dt;
